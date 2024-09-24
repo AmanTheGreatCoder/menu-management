@@ -17,7 +17,7 @@ import { useMenus } from '../queries/use-menus';
 import { ICreateMenuItem } from '../types/menu';
 
 export const MenuTemplate: React.FC = () => {
-	const { menus, isLoading } = useMenus();
+	const { menus } = useMenus();
 	const [isExpanded, setIsExpanded] = useState(false);
 	const dispatch = useDispatch();
 	const selectedMenuId = useSelector(
