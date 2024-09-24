@@ -1,8 +1,8 @@
 'use client';
 import { ChevronDownIcon } from '@heroicons/react/24/outline';
 import { useEffect, useState } from 'react';
-import { IMenuItem } from '../types/menu-item';
-import CustomModal from './CustomModal';
+import { IMenuItem } from '../types/menu';
+import CustomModal from '../../core/components/CustomModal';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/api';
 import { toast } from 'react-toastify';
@@ -30,7 +30,7 @@ export const AccordionItem: React.FC<IAccordionItemProps> = ({
 	newItemAdded,
 	onExpanded,
 }) => {
-	const [isOpen, setIsOpen] = useState(expand);
+	const [isOpen, setIsOpen] = useState(false);
 	const [isHovered, setIsHovered] = useState(false);
 	const [isModalOpen, setIsModalOpen] = useState(false);
 	const queryClient = useQueryClient();
@@ -67,12 +67,23 @@ export const AccordionItem: React.FC<IAccordionItemProps> = ({
 		mutation.mutate();
 	};
 
+	const handleToggle = () => {
+		console.log('toglle clicked', isOpen);
+		setIsOpen(!isOpen);
+	};
+
+	useEffect(() => {
+		setIsOpen(expand);
+	}, [expand]);
+
 	useEffect(() => {
 		if (newItemAdded === item.id && !isOpen) {
 			setIsOpen(true);
 			onExpanded();
 		}
 	}, [newItemAdded, item.id, isOpen, onExpanded]);
+
+	console.log('isOpen', isOpen);
 
 	return (
 		<div className={`relative ml-${depth * 4}`}>
@@ -81,7 +92,7 @@ export const AccordionItem: React.FC<IAccordionItemProps> = ({
 			)}
 			<div
 				className='flex items-center justify-start cursor-pointer py-2 relative'
-				onClick={() => setIsOpen(!isOpen)}
+				onClick={handleToggle}
 			>
 				{depth > 0 && (
 					<div className='absolute left-[-16px] top-1/2 w-4 border-t border-gray-300' />

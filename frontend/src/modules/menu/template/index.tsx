@@ -9,12 +9,12 @@ import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { toast } from 'react-toastify';
 import { AccordionItem } from '../components/AccordionItem';
-import { Dropdown } from '../components/Dropdown';
+import { Dropdown } from '../components/MenuDropdown';
 import { ExpandCollapseButton } from '../components/ExpandCollapseButton';
 import { MenuSidebar } from '../components/MenuSidebar';
 import MenuForm from '../form';
 import { useMenus } from '../queries/use-menus';
-import { ICreateMenuItem } from '../types/menu-item';
+import { ICreateMenuItem } from '../types/menu';
 
 export const MenuTemplate: React.FC = () => {
 	const { menus, isLoading } = useMenus();
@@ -23,6 +23,7 @@ export const MenuTemplate: React.FC = () => {
 	const selectedMenuId = useSelector(
 		(state: RootState) => state.menu.selectedMenuId
 	);
+
 	const [newItemAdded, setNewItemAdded] = useState<string | null>(null);
 
 	const [isEditing, setIsEditing] = useState(false);

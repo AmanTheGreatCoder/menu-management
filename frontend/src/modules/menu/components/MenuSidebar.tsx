@@ -6,27 +6,27 @@ import MenuSection from './MenuSection';
 
 const menuItems = [
 	{
-		icon: 'https://cdn.builder.io/api/v1/image/assets/TEMP/130f1061d000aba25688e014e97faf63e764496c62dc0b00ef7457d26e31fc69?placeholderIfAbsent=true&apiKey=d39389e2ddda4e698370a42a05bee39d',
+		icon: '/assets/icons/systems.svg',
 		text: 'Systems',
 		active: false,
 	},
 	{
-		icon: 'https://cdn.builder.io/api/v1/image/assets/TEMP/076274166fc8202140b747ccac09a65d58d821ddfd0db5bd2a83538fe0ef915e?placeholderIfAbsent=true&apiKey=d39389e2ddda4e698370a42a05bee39d',
+		icon: '/assets/icons/system-code.svg',
 		text: 'System Code',
 		active: false,
 	},
 	{
-		icon: 'https://cdn.builder.io/api/v1/image/assets/TEMP/ccde29c65c3cf6440ce8f4bd3c12f698ad6d3e39f54570d9eb5ffd674c56a138?placeholderIfAbsent=true&apiKey=d39389e2ddda4e698370a42a05bee39d',
+		icon: '/assets/icons/properties.svg',
 		text: 'Properties',
 		active: false,
 	},
 	{
-		icon: 'https://cdn.builder.io/api/v1/image/assets/TEMP/a0b0c0f678d1d22b64dc9959aaf706a2776923b7ae7a98360d68f0fa0bb9e064?placeholderIfAbsent=true&apiKey=d39389e2ddda4e698370a42a05bee39d',
+		icon: '/assets/icons/menus.svg',
 		text: 'Menus',
 		active: true,
 	},
 	{
-		icon: 'https://cdn.builder.io/api/v1/image/assets/TEMP/ccde29c65c3cf6440ce8f4bd3c12f698ad6d3e39f54570d9eb5ffd674c56a138?placeholderIfAbsent=true&apiKey=d39389e2ddda4e698370a42a05bee39d',
+		icon: '/assets/icons/properties.svg',
 		text: 'API List',
 		active: false,
 	},
@@ -34,11 +34,11 @@ const menuItems = [
 
 const additionalSections = [
 	{
-		icon: 'https://cdn.builder.io/api/v1/image/assets/TEMP/e0306e8115e1f809792d07163d21d5d2fd27071ac35f6c6b7213f812c2cd3d34?placeholderIfAbsent=true&apiKey=d39389e2ddda4e698370a42a05bee39d',
+		icon: '/assets/icons/users-group.svg',
 		text: 'Users & Group',
 	},
 	{
-		icon: 'https://cdn.builder.io/api/v1/image/assets/TEMP/e0306e8115e1f809792d07163d21d5d2fd27071ac35f6c6b7213f812c2cd3d34?placeholderIfAbsent=true&apiKey=d39389e2ddda4e698370a42a05bee39d',
+		icon: '/assets/icons/users-group.svg',
 		text: 'Competition',
 	},
 ];

@@ -3,9 +3,9 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import React, { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useSelector } from 'react-redux';
-import Button from '../components/Button';
-import InputField from '../components/InputField';
-import { ICreateMenuItem } from '../types/menu-item';
+import Button from '../../core/components/Button';
+import InputField from '../../core/components/InputField';
+import { ICreateMenuItem } from '../types/menu';
 import { createMenuItemSchema, CreateMenuItemSchema } from './schema';
 import { useMenu } from '../queries/use-menu';
 

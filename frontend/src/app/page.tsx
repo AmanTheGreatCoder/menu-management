@@ -1,9 +1,7 @@
-import { MenuTemplate } from '../modules/menu/templates';
+import { MenuTemplate } from '../modules/menu/template';
 import type { FC } from 'react';
 
-interface MenuPageProps {}
-
-const MenuPage: FC<MenuPageProps> = () => {
+const MenuPage: FC = () => {
 	return <MenuTemplate />;
 };
 

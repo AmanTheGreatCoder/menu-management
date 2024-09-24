@@ -1,13 +1,5 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-	images: {
-		remotePatterns: [
-			{
-				hostname: 'cdn.builder.io',
-				protocol: 'https',
-			},
-		],
-	},
 	rewrites: async () => {
 		return [
 			{

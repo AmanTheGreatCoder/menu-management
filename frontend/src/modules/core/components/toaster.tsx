@@ -1,9 +1,7 @@
 import type { FC } from 'react';
 import { ToastContainer } from 'react-toastify';
 
-interface ToasterProps {}
-
-const Toaster: FC<ToasterProps> = () => {
+const Toaster: FC = () => {
 	return <ToastContainer position='top-right' stacked theme={'light'} />;
 };
 
