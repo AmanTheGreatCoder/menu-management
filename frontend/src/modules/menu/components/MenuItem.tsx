@@ -1,3 +1,4 @@
+import Image from 'next/image';
 import React from 'react';
 
 interface MenuItemProps {
@@ -15,8 +16,9 @@ const MenuItem: React.FC<MenuItemProps> = ({ icon, text, active = false }) => {
 
 	return (
 		<div className={`${baseClasses} ${activeClasses}`}>
-			<img
-				loading='lazy'
+			<Image
+				width={24}
+				height={24}
 				src={icon}
 				alt=''
 				className='object-contain shrink-0 self-stretch my-auto w-6 aspect-square'

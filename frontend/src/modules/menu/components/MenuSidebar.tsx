@@ -1,8 +1,8 @@
 'use client';
-import React, { useState } from 'react';
+import Image from 'next/image';
+import React from 'react';
 import MenuItem from './MenuItem';
 import MenuSection from './MenuSection';
-import Image from 'next/image';
 
 const menuItems = [
 	{
@@ -44,56 +44,29 @@ const additionalSections = [
 ];
 
 export const MenuSidebar: React.FC = () => {
-	const [isOpen, setIsOpen] = useState(true);
-
-	const toggleMenu = () => {
-		setIsOpen(!isOpen);
-	};
-
 	return (
 		<div
-			className={`flex overflow-hidden flex-col pb-1.5 m-6 w-full max-w-60 bg-gray-900 rounded-3xl max-md:mt-6 transition-all duration-300 ${
-				isOpen ? 'w-60' : 'w-16'
-			}`}
+			className={`flex overflow-hidden h-[95vh] flex-col pb-1.5 m-6 w-full max-w-60 bg-gray-900 rounded-3xl max-md:mt-6 transition-all duration-300 ${'w-60'}`}
 		>
 			<header className='flex gap-10 justify-between items-center px-8 py-8 max-md:px-5'>
-				{isOpen && (
-					<Image
-						loading='lazy'
-						src='/assets/icons/logo.svg'
-						alt='Company logo'
-						width={70}
-						height={22}
-						className={`object-contain shrink-0 self-stretch my-auto aspect-[3.33] ${
-							isOpen ? 'w-[70px]' : 'w-0'
-						} transition-all duration-300`}
-					/>
-				)}
+				<Image
+					src='/assets/icons/logo.svg'
+					alt='Company logo'
+					width={70}
+					height={22}
+					className={`object-contain shrink-0 self-stretch my-auto aspect-[3.33] ${'w-[70px]'} transition-all duration-300`}
+				/>
 
-				{!isOpen ? (
-					<Image
-						src='/assets/icons/menu-open.svg'
-						alt='Menu icon'
-						width={24}
-						height={24}
-						className='object-contain self-stretch my-auto w-6 aspect-square'
-						onClick={toggleMenu}
-					/>
-				) : (
-					<Image
-						src='/assets/icons/menu-close.svg'
-						alt='Menu icon'
-						className='object-contain self-stretch my-auto w-6 aspect-square'
-						width={24}
-						height={24}
-						onClick={toggleMenu}
-					/>
-				)}
+				<Image
+					src='/assets/icons/menu-close.svg'
+					alt='Menu icon'
+					width={24}
+					height={24}
+					className='object-contain self-stretch my-auto w-6 aspect-square'
+				/>
 			</header>
 			<main
-				className={`flex flex-col px-4 pt-2.5 text-sm font-bold tracking-tight leading-none text-gray-500 min-h-[942px] pb-[564px] max-md:pb-24 transition-all duration-300 ${
-					isOpen ? 'opacity-100' : 'opacity-100'
-				}`}
+				className={`flex flex-col px-4 pt-2.5 text-sm font-bold tracking-tight leading-none text-gray-500 min-h-[942px] pb-[564px] max-md:pb-24 transition-all duration-300 opacity-100`}
 			>
 				<nav className='flex flex-col w-52 max-w-full'>
 					<MenuSection>

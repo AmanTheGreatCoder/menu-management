@@ -1,52 +1,78 @@
 'use client';
 import { ChevronDownIcon } from '@heroicons/react/24/outline';
-import { useState } from 'react';
-import Modal from 'react-modal';
+import { useEffect, useState } from 'react';
 import { IMenuItem } from '../types/menu-item';
-
-Modal.setAppElement('#__next');
+import CustomModal from './CustomModal';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { api } from '@/api';
+import { toast } from 'react-toastify';
+import { IApiError } from '@/api/types';
+import { clearSelectedMenu, selectMenu } from '@/store/slices/menuSlice';
+import { useDispatch, useSelector } from 'react-redux';
+import { RootState } from '@/store';
 
 interface IAccordionItemProps {
 	item: IMenuItem;
 	depth: number;
+	newItemAdded: string | null;
+	onExpanded: () => void;
 	expand: boolean;
 	isEditing: boolean;
-	selectedMenu: IMenuItem | null;
 	setIsEditing: (isEditing: boolean) => void;
-	setSelectedMenu: (menu: IMenuItem) => void;
 }
 
 export const AccordionItem: React.FC<IAccordionItemProps> = ({
 	item,
 	depth,
 	expand,
-	setSelectedMenu,
 	setIsEditing,
 	isEditing,
-	selectedMenu,
+	newItemAdded,
+	onExpanded,
 }) => {
 	const [isOpen, setIsOpen] = useState(expand);
 	const [isHovered, setIsHovered] = useState(false);
-	const [isModalOpen, setIsModalOpen] = useState(true);
-
-	console.log('item in accordion', item);
+	const [isModalOpen, setIsModalOpen] = useState(false);
+	const queryClient = useQueryClient();
+	const dispatch = useDispatch();
+	const selectedMenuId = useSelector(
+		(state: RootState) => state.menu.selectedMenuId
+	);
 
 	const handleAddClick = (event: React.MouseEvent) => {
 		event.stopPropagation();
-		console.log('Add clicked', item);
-		setSelectedMenu({ ...item, depth: depth });
+		setIsEditing(false);
+		dispatch(selectMenu(item.id));
 	};
+
+	const mutation = useMutation({
+		mutationFn: () => api.menu.remove(item.id),
+		onSuccess: () => {
+			toast.success('Menu deleted successfully');
+			queryClient.invalidateQueries({ queryKey: ['menus'] });
+			dispatch(clearSelectedMenu());
+			setIsEditing(false);
+		},
+		onError: (error: IApiError) => {
+			toast.error(error?.message);
+		},
+	});
 
 	const handleDeleteClick = (event: React.MouseEvent) => {
 		event.stopPropagation();
 		setIsModalOpen(true);
-		console.log('Delete clicked');
 	};
 
 	const confirmDelete = () => {
-		setIsModalOpen(false);
-		console.log('Confirmed delete');
+		mutation.mutate();
 	};
+
+	useEffect(() => {
+		if (newItemAdded === item.id && !isOpen) {
+			setIsOpen(true);
+			onExpanded();
+		}
+	}, [newItemAdded, item.id, isOpen, onExpanded]);
 
 	return (
 		<div className={`relative ml-${depth * 4}`}>
@@ -60,7 +86,7 @@ export const AccordionItem: React.FC<IAccordionItemProps> = ({
 				{depth > 0 && (
 					<div className='absolute left-[-16px] top-1/2 w-4 border-t border-gray-300' />
 				)}
-				{item.children ? (
+				{item?.children?.length && item?.children?.length > 0 ? (
 					<ChevronDownIcon
 						className={`w-4 h-4 mr-2 transition-transform ${
 							isOpen ? 'transform rotate-180' : ''
@@ -71,13 +97,14 @@ export const AccordionItem: React.FC<IAccordionItemProps> = ({
 				)}
 				<span
 					className={`flex h-7 ${
-						isEditing && selectedMenu?.id === item.id ? 'font-semibold' : ''
+						isEditing && selectedMenuId === item.id ? 'font-semibold' : ''
 					}`}
 					onMouseEnter={() => setIsHovered(true)}
 					onMouseLeave={() => setIsHovered(false)}
 					onClick={() => {
+						console.log('setting is editing true');
 						setIsEditing(true);
-						setSelectedMenu({ ...item, depth: depth });
+						dispatch(selectMenu(item.id));
 					}}
 				>
 					{item.name}
@@ -99,7 +126,7 @@ export const AccordionItem: React.FC<IAccordionItemProps> = ({
 					)}
 				</span>
 			</div>
-			{isOpen && item.children && (
+			{isOpen && item?.children && item?.children?.length > 0 && (
 				<div className='ml-4'>
 					{item?.children?.map((child, index) => (
 						<AccordionItem
@@ -107,55 +134,26 @@ export const AccordionItem: React.FC<IAccordionItemProps> = ({
 							key={index}
 							item={child}
 							isEditing={isEditing}
-							selectedMenu={selectedMenu}
 							depth={depth + 1}
+							newItemAdded={newItemAdded}
+							onExpanded={onExpanded}
 							setIsEditing={setIsEditing}
-							setSelectedMenu={setSelectedMenu}
 						/>
 					))}
 				</div>
 			)}
 
-			<Modal
+			<CustomModal
 				isOpen={isModalOpen}
 				onRequestClose={() => setIsModalOpen(false)}
-				contentLabel='Confirm Delete'
-				className='modal'
-				overlayClassName='overlay'
-				ariaHideApp={false}
-				style={{
-					content: {
-						top: '50%',
-						left: '50%',
-						right: 'auto',
-						bottom: 'auto',
-						transform: 'translate(-50%, -50%)',
-					},
-				}}
+				onConfirm={confirmDelete}
+				contentLabel='Confirm'
 			>
-				<div className='modal-content'>
-					<img
-						src='/assets/icons/warning.svg'
-						alt='Warning'
-						className='modal-icon'
-					/>
-					<h2>
-						Are you sure you want to delete this Menu{' '}
-						<strong>{item.name}</strong>?
-					</h2>
-					<div className='modal-buttons'>
-						<button onClick={confirmDelete} className='modal-button delete'>
-							Delete
-						</button>
-						<button
-							onClick={() => setIsModalOpen(false)}
-							className='modal-button cancel'
-						>
-							Cancel
-						</button>
-					</div>
-				</div>
-			</Modal>
+				<p>
+					Are you sure you want to delete this Menu <strong>{item.name}</strong>
+					?
+				</p>
+			</CustomModal>
 		</div>
 	);
 };

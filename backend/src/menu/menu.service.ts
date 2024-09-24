@@ -15,10 +15,33 @@ export class MenuService {
 
   constructor(private readonly prisma: PrismaService) {}
 
+  private buildHierarchy(items: MenuItem[]): MenuItem[] {
+    const itemMap = new Map();
+    const rootItems: MenuItem[] = [];
+
+    items.forEach((item) => {
+      itemMap.set(item.id, { ...item, children: [] });
+    });
+
+    items.forEach((item) => {
+      const mappedItem = itemMap.get(item.id);
+      if (item.parentId === null) {
+        rootItems.push(mappedItem);
+      } else {
+        const parent = itemMap.get(item.parentId);
+        if (parent) {
+          parent.children.push(mappedItem);
+        }
+      }
+    });
+
+    return rootItems;
+  }
+
   async findById(id: string): Promise<MenuItem> {
     const menu = await this.prisma.menuItem.findUnique({
       where: { id },
-      include: { children: true },
+      include: { children: true, parent: true },
     });
 
     if (!menu) {
@@ -28,29 +51,27 @@ export class MenuService {
   }
 
   async findAll(): Promise<MenuItem[]> {
-    return this.prisma.menuItem.findMany({
+    const items = await this.prisma.menuItem.findMany({
       include: { children: true },
     });
+    return this.buildHierarchy(items);
   }
 
   async create(dto: CreateMenuDto): Promise<MenuItem> {
-    if (dto.parentId) {
-      const parentMenu = await this.findById(dto.parentId);
-
-      console.log('parentMenu', parentMenu);
-      if (!parentMenu) {
-        throw new NotFoundException('Parent menu not found');
-      }
-    }
     try {
       const menu = await this.prisma.menuItem.create({
         data: {
           name: dto.name,
+          depth: dto.depth,
           ...(dto.parentId && {
             parent: {
               connectOrCreate: {
                 where: { id: dto.parentId },
-                create: { id: dto.parentId, name: dto.name },
+                create: {
+                  id: dto.parentId,
+                  name: dto.name,
+                  depth: dto.depth - 1,
+                },
               },
             },
           }),
@@ -68,10 +89,6 @@ export class MenuService {
         throw new BadRequestException(error.message || 'Something went wrong');
       }
     }
-  }
-
-  async read(id: string): Promise<MenuItem> {
-    return this.findById(id);
   }
 
   async update(id: string, dto: UpdateMenuDto): Promise<MenuItem> {
@@ -98,9 +115,7 @@ export class MenuService {
 
   async remove(id: string): Promise<void> {
     try {
-      await this.prisma.menuItem.delete({
-        where: { id },
-      });
+      await this.recursiveDelete(id);
       this.logger.log(`Menu deleted: ${id}`);
     } catch (error) {
       if (isPrismaNotFound(error)) {
@@ -108,5 +123,19 @@ export class MenuService {
       }
       throw error;
     }
+  }
+
+  private async recursiveDelete(id: string): Promise<void> {
+    const children = await this.prisma.menuItem.findMany({
+      where: { parentId: id },
+    });
+
+    await Promise.all(
+      children.map(async (child) => await this.recursiveDelete(child.id)),
+    );
+
+    await this.prisma.menuItem.delete({
+      where: { id },
+    });
   }
 }

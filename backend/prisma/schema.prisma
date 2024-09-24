@@ -14,9 +14,11 @@ datasource db {
 }
 
 model MenuItem {
-  id       String     @id @default(uuid())
+  id       String  @id @default(uuid())
   name     String
   parentId String?
+  depth    Int
+
   parent   MenuItem?  @relation("MenuItemToMenuItem", fields: [parentId], references: [id])
   children MenuItem[] @relation("MenuItemToMenuItem")
 

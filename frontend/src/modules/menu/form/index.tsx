@@ -1,24 +1,35 @@
-import React, { useEffect } from 'react';
-import InputField from '../components/InputField';
-import Button from '../components/Button';
-import { IMenuItem } from '../types/menu-item';
-import { createMenuItemSchema, CreateMenuItemSchema } from './schema';
-import { useForm } from 'react-hook-form';
+import { RootState } from '@/store';
 import { zodResolver } from '@hookform/resolvers/zod';
+import React, { useEffect, useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { useSelector } from 'react-redux';
+import Button from '../components/Button';
+import InputField from '../components/InputField';
+import { ICreateMenuItem } from '../types/menu-item';
+import { createMenuItemSchema, CreateMenuItemSchema } from './schema';
+import { useMenu } from '../queries/use-menu';
 
 interface MenuFormProps {
-	selectedMenu: IMenuItem | null;
 	isEditing: boolean;
-	onSave: (data: CreateMenuItemSchema) => void;
+	hasParent: boolean;
+	onSave: (data: ICreateMenuItem) => void;
 }
 
 const MenuForm: React.FC<MenuFormProps> = ({
-	selectedMenu,
 	isEditing,
+	hasParent,
 	onSave,
 }) => {
-	console.log('form isEditing', isEditing);
-	console.log('form selectedMenu', selectedMenu);
+	const [isButtonDisabled, setIsButtonDisabled] = useState(false);
+	const selectedMenuId = useSelector(
+		(state: RootState) => state.menu.selectedMenuId
+	);
+	const { menu } = useMenu(selectedMenuId ?? '');
+	const initialValues = {
+		name: '',
+		depth: undefined,
+		parentData: '',
+	};
 
 	const form = useForm<CreateMenuItemSchema>({
 		defaultValues: {
@@ -30,18 +41,43 @@ const MenuForm: React.FC<MenuFormProps> = ({
 	});
 
 	const onSubmit = (data: CreateMenuItemSchema) => {
-		onSave(data);
+		onSave({
+			name: data?.name,
+			depth: data?.depth,
+			parentId: selectedMenuId ?? '',
+		});
+		form.reset(initialValues);
 	};
 
 	useEffect(() => {
-		if (isEditing && selectedMenu) {
-			form.reset({
-				name: selectedMenu.name,
-				depth: selectedMenu.depth,
-				parentData: selectedMenu.parentData,
-			});
+		if (hasParent === false) {
+			setIsButtonDisabled(false);
+			form.reset(initialValues);
+		} else if (isEditing || (form?.watch('parentData') as string)?.length > 0) {
+			setIsButtonDisabled(false);
+		} else {
+			setIsButtonDisabled(true);
 		}
-	}, [isEditing, selectedMenu, form]);
+	}, [hasParent, form.watch('parentData'), isEditing]);
+
+	useEffect(() => {
+		if (menu) {
+			if (isEditing) {
+				form.reset({
+					name: menu?.name,
+					depth: menu?.depth,
+					parentData: menu?.parent?.name,
+				});
+			} else {
+				form.reset({
+					name: '',
+					depth: undefined,
+					// TODO: check this
+					parentData: menu?.name,
+				});
+			}
+		}
+	}, [isEditing, menu, form]);
 
 	return (
 		<form
@@ -85,14 +121,8 @@ const MenuForm: React.FC<MenuFormProps> = ({
 				className='mt-1.5 max-w-full w-[262px]'
 			/>
 			<Button
-				onClick={() =>
-					onSave({
-						id: form.getValues('id') ?? undefined,
-						name: form.getValues('name'),
-						depth: form.getValues('depth'),
-						parentData: form.getValues('parentData') ?? undefined,
-					})
-				}
+				disabled={isButtonDisabled}
+				type='submit'
 				className='mt-4 max-w-full w-[263px]'
 			>
 				Save

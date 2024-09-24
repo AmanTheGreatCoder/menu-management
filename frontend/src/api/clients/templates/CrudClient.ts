@@ -18,7 +18,7 @@ export class CrudClient<
 	}
 
 	async create(data: C) {
-		return this.post<T>('/', data);
+		return await this.post<T>('/', data);
 	}
 
 	async update(id: string, data: U) {
