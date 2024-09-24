@@ -53,8 +53,6 @@ export const MenuTemplate: React.FC = () => {
 		},
 	});
 
-	if (isLoading) return <div>Loading...</div>;
-
 	return (
 		<section className='flex w-full '>
 			<MenuSidebar />
