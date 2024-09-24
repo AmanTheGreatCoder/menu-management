@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import InputField from '../components/InputField';
 import Button from '../components/Button';
 import { IMenuItem } from '../types/menu-item';
@@ -7,18 +7,24 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 
 interface MenuFormProps {
-	menu?: IMenuItem;
+	selectedMenu: IMenuItem | null;
+	isEditing: boolean;
 	onSave: (data: CreateMenuItemSchema) => void;
 }
 
-const MenuForm: React.FC<MenuFormProps> = ({ menu, onSave }) => {
-	const { id, name, depth, parentData } = menu || {};
+const MenuForm: React.FC<MenuFormProps> = ({
+	selectedMenu,
+	isEditing,
+	onSave,
+}) => {
+	console.log('form isEditing', isEditing);
+	console.log('form selectedMenu', selectedMenu);
 
 	const form = useForm<CreateMenuItemSchema>({
 		defaultValues: {
-			name: name ?? '',
-			depth: depth ?? undefined,
-			parentData: parentData ?? '',
+			name: '',
+			depth: undefined,
+			parentData: '',
 		},
 		resolver: zodResolver(createMenuItemSchema),
 	});
@@ -27,7 +33,15 @@ const MenuForm: React.FC<MenuFormProps> = ({ menu, onSave }) => {
 		onSave(data);
 	};
 
-	console.log('form.formState.errors', form.formState.errors);
+	useEffect(() => {
+		if (isEditing && selectedMenu) {
+			form.reset({
+				name: selectedMenu.name,
+				depth: selectedMenu.depth,
+				parentData: selectedMenu.parentData,
+			});
+		}
+	}, [isEditing, selectedMenu, form]);
 
 	return (
 		<form
@@ -36,7 +50,7 @@ const MenuForm: React.FC<MenuFormProps> = ({ menu, onSave }) => {
 		>
 			<InputField
 				label='Menu ID'
-				value={id ?? ''}
+				value={form.watch('id') ?? ''}
 				readOnly
 				className='self-stretch w-full'
 			/>
@@ -49,12 +63,13 @@ const MenuForm: React.FC<MenuFormProps> = ({ menu, onSave }) => {
 						form.setValue('depth', parseInt(e.target.value));
 					},
 				}}
+				readOnly={isEditing}
 				errorMessage={form?.formState?.errors?.depth?.message}
 				className='mt-4 max-w-full w-[262px]'
 			/>
 			<InputField
 				label='Parent Data'
-				value={parentData ?? ''}
+				value={form.watch('parentData') ?? ''}
 				readOnly
 				className='mt-5 max-w-full w-[262px]'
 			/>

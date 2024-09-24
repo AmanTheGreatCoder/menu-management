@@ -79,7 +79,7 @@ export class MenuService {
       const menu = await this.prisma.menuItem.update({
         where: { id },
         data: {
-          ...dto.updatedData,
+          name: dto.name,
         },
         include: { children: true },
       });

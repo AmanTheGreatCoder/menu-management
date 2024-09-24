@@ -2,6 +2,7 @@ import React from 'react';
 import { BaseProvider } from '@/providers/base-provider';
 import type { Metadata } from 'next';
 import localFont from 'next/font/local';
+import 'react-toastify/ReactToastify.css';
 import './globals.css';
 
 const geistSans = localFont({
@@ -27,7 +28,7 @@ export default function RootLayout({
 	children: React.ReactNode;
 }>) {
 	return (
-		<html lang='en'>
+		<html lang='en' id='__next'>
 			<body
 				className={`${geistSans.variable} ${geistMono.variable} antialiased`}
 			>

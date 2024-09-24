@@ -2,7 +2,7 @@
 import { api } from '@/api';
 import { IApiError } from '@/api/types';
 import { useMutation } from '@tanstack/react-query';
-import React from 'react';
+import React, { useState } from 'react';
 import { toast } from 'react-toastify';
 import { AccordionItem } from '../components/AccordionItem';
 import { Dropdown } from '../components/Dropdown';
@@ -11,77 +11,25 @@ import { MenuSidebar } from '../components/MenuSidebar';
 import MenuForm from '../form';
 import { CreateMenuItemSchema } from '../form/schema';
 import { useMenus } from '../queries/use-menus';
-
-// const accordionData: IAccordionItem[] = [
-// 	{
-// 		id: 'system-management',
-// 		name: 'system management',
-// 		children: [
-// 			{
-// 				id: 'system-management',
-// 				name: 'System Management',
-// 				children: [
-// 					{
-// 						id: 'systems',
-// 						name: 'Systems',
-// 						children: [
-// 							{
-// 								id: 'system-code',
-// 								name: 'System Code',
-// 								children: [
-// 									{
-// 										id: 'code-registration',
-// 										name: 'Code Registration',
-// 									},
-// 								],
-// 							},
-// 							{
-// 								id: 'code-registration-2',
-// 								name: 'Code Registration - 2',
-// 							},
-// 							{
-// 								id: 'properties',
-// 								name: 'Properties',
-// 							},
-// 							{
-// 								id: 'menus',
-// 								name: 'Menus',
-// 								children: [
-// 									{
-// 										id: 'menu-registration',
-// 										name: 'Menu Registration',
-// 									},
-// 								],
-// 							},
-// 							{
-// 								id: 'api-list',
-// 								name: 'API List',
-// 								children: [
-// 									{
-// 										id: 'api-registration',
-// 										name: 'API Registration',
-// 									},
-// 									{
-// 										id: 'api-edit',
-// 										name: 'API Edit',
-// 									},
-// 								],
-// 							},
-// 						],
-// 					},
-// 				],
-// 			},
-// 		],
-// 	},
-// ];
+import { IMenuItem } from '../types/menu-item';
 
 export const MenuTemplate: React.FC = () => {
 	const { menus, isLoading } = useMenus();
+	const [isExpanded, setIsExpanded] = useState(false);
+	const [selectedMenu, setSelectedMenu] = useState<IMenuItem | null>(null);
+	const [isEditing, setIsEditing] = useState(false);
 
 	const mutation = useMutation({
-		mutationFn: (data: CreateMenuItemSchema) => api.menu.create(data),
+		mutationFn: (data: CreateMenuItemSchema) =>
+			isEditing
+				? api.menu.update(selectedMenu?.id ?? '', { name: data.name })
+				: api.menu.create(data),
 		onSuccess: (data) => {
-			toast.success('Menu added successfully');
+			toast.success(
+				isEditing ? 'Menu updated successfully' : 'Menu added successfully'
+			);
+			setIsEditing(false);
+
 			console.log('data', data);
 		},
 		onError: (error: IApiError) => {
@@ -114,24 +62,37 @@ export const MenuTemplate: React.FC = () => {
 					<div className='w-full'>
 						<div className='flex gap-2 mb-4 items-start self-stretch text-sm font-bold tracking-tight leading-none text-center'>
 							<ExpandCollapseButton
-								onClick={() => console.log('Expand All')}
+								onClick={() => setIsExpanded(true)}
 								text='Expand All'
-								expanded={true}
+								isSelected={isExpanded === true}
 							/>
 							<ExpandCollapseButton
-								onClick={() => console.log('Collapse All')}
+								onClick={() => setIsExpanded(false)}
 								text='Collapse All'
-								expanded={false}
+								isSelected={isExpanded === false}
 							/>
 						</div>
 
 						{menus?.map((item) => (
-							<AccordionItem key={item.id} item={item} depth={0} />
+							<AccordionItem
+								expand={isExpanded}
+								key={item.id}
+								item={item}
+								depth={0}
+								isEditing={isEditing}
+								selectedMenu={selectedMenu}
+								setIsEditing={setIsEditing}
+								setSelectedMenu={setSelectedMenu}
+							/>
 						))}
 					</div>
 
 					<div className='bg-white rounded-lg w-full '>
-						<MenuForm onSave={(data) => mutation.mutate(data)} />
+						<MenuForm
+							selectedMenu={selectedMenu}
+							isEditing={isEditing}
+							onSave={(data) => mutation.mutate(data)}
+						/>
 					</div>
 				</div>
 			</div>

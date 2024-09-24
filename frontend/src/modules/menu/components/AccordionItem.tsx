@@ -1,25 +1,51 @@
 'use client';
 import { ChevronDownIcon } from '@heroicons/react/24/outline';
 import { useState } from 'react';
-import { IAccordionItem } from '../types/accordion';
+import Modal from 'react-modal';
+import { IMenuItem } from '../types/menu-item';
 
-export const AccordionItem: React.FC<{
-	item: IAccordionItem;
+Modal.setAppElement('#__next');
+
+interface IAccordionItemProps {
+	item: IMenuItem;
 	depth: number;
-}> = ({ item, depth }) => {
-	const [isOpen, setIsOpen] = useState(false);
+	expand: boolean;
+	isEditing: boolean;
+	selectedMenu: IMenuItem | null;
+	setIsEditing: (isEditing: boolean) => void;
+	setSelectedMenu: (menu: IMenuItem) => void;
+}
+
+export const AccordionItem: React.FC<IAccordionItemProps> = ({
+	item,
+	depth,
+	expand,
+	setSelectedMenu,
+	setIsEditing,
+	isEditing,
+	selectedMenu,
+}) => {
+	const [isOpen, setIsOpen] = useState(expand);
 	const [isHovered, setIsHovered] = useState(false);
+	const [isModalOpen, setIsModalOpen] = useState(true);
+
+	console.log('item in accordion', item);
 
 	const handleAddClick = (event: React.MouseEvent) => {
 		event.stopPropagation();
-		// Add your add logic here
-		console.log('Add clicked');
+		console.log('Add clicked', item);
+		setSelectedMenu({ ...item, depth: depth });
 	};
 
 	const handleDeleteClick = (event: React.MouseEvent) => {
 		event.stopPropagation();
-		// Add your delete logic here
+		setIsModalOpen(true);
 		console.log('Delete clicked');
+	};
+
+	const confirmDelete = () => {
+		setIsModalOpen(false);
+		console.log('Confirmed delete');
 	};
 
 	return (
@@ -44,9 +70,15 @@ export const AccordionItem: React.FC<{
 					<span className='w-4 h-4 mr-2' />
 				)}
 				<span
-					className='flex h-7'
+					className={`flex h-7 ${
+						isEditing && selectedMenu?.id === item.id ? 'font-semibold' : ''
+					}`}
 					onMouseEnter={() => setIsHovered(true)}
 					onMouseLeave={() => setIsHovered(false)}
+					onClick={() => {
+						setIsEditing(true);
+						setSelectedMenu({ ...item, depth: depth });
+					}}
 				>
 					{item.name}
 					{isHovered && (
@@ -69,11 +101,61 @@ export const AccordionItem: React.FC<{
 			</div>
 			{isOpen && item.children && (
 				<div className='ml-4'>
-					{item.children.map((child, index) => (
-						<AccordionItem key={index} item={child} depth={depth + 1} />
+					{item?.children?.map((child, index) => (
+						<AccordionItem
+							expand={expand}
+							key={index}
+							item={child}
+							isEditing={isEditing}
+							selectedMenu={selectedMenu}
+							depth={depth + 1}
+							setIsEditing={setIsEditing}
+							setSelectedMenu={setSelectedMenu}
+						/>
 					))}
 				</div>
 			)}
+
+			<Modal
+				isOpen={isModalOpen}
+				onRequestClose={() => setIsModalOpen(false)}
+				contentLabel='Confirm Delete'
+				className='modal'
+				overlayClassName='overlay'
+				ariaHideApp={false}
+				style={{
+					content: {
+						top: '50%',
+						left: '50%',
+						right: 'auto',
+						bottom: 'auto',
+						transform: 'translate(-50%, -50%)',
+					},
+				}}
+			>
+				<div className='modal-content'>
+					<img
+						src='/assets/icons/warning.svg'
+						alt='Warning'
+						className='modal-icon'
+					/>
+					<h2>
+						Are you sure you want to delete this Menu{' '}
+						<strong>{item.name}</strong>?
+					</h2>
+					<div className='modal-buttons'>
+						<button onClick={confirmDelete} className='modal-button delete'>
+							Delete
+						</button>
+						<button
+							onClick={() => setIsModalOpen(false)}
+							className='modal-button cancel'
+						>
+							Cancel
+						</button>
+					</div>
+				</div>
+			</Modal>
 		</div>
 	);
 };

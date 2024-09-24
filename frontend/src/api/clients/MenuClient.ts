@@ -1,6 +1,7 @@
+import { IMenuItem } from '@/modules/menu/types/menu-item';
 import { CrudClient } from './templates/CrudClient';
 
-export class MenuClient extends CrudClient {
+export class MenuClient extends CrudClient<IMenuItem> {
 	constructor() {
 		super('menu');
 	}

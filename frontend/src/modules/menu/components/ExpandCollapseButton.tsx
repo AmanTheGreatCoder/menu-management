@@ -2,13 +2,13 @@ import React from 'react';
 
 interface ExpandCollapseButtonProps {
 	text: string;
-	expanded: boolean;
+	isSelected: boolean;
 	onClick: () => void;
 }
 
 export const ExpandCollapseButton: React.FC<ExpandCollapseButtonProps> = ({
 	text,
-	expanded,
+	isSelected,
 	onClick,
 }) => {
 	const baseClasses =
@@ -19,7 +19,7 @@ export const ExpandCollapseButton: React.FC<ExpandCollapseButtonProps> = ({
 	return (
 		<button
 			className={`flex flex-col ${baseClasses} ${
-				expanded ? expandedClasses : collapsedClasses
+				isSelected ? expandedClasses : collapsedClasses
 			}`}
 			onClick={onClick}
 		>
